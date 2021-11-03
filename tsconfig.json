@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "dist"
+  },
+  "extends": "@tsconfig/node14/tsconfig.json",
+  "root": true,
+  "exclude": [
+    "dist",
+    "example",
+    "build",
+    "node_modules",
+    "tests"
+  ]
+}

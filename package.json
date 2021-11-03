@@ -1,0 +1,66 @@
+{
+  "name": "changelog-parser",
+  "description": "Parse CHANGELOG files from https://keepachangelog.com format.",
+  "license": "MIT",
+  "version": "0.0.1",
+  "author": {
+    "name": "Oliver Steele",
+    "email": "steele@osteele.com",
+    "url": "https://code.osteele.com"
+  },
+  "keywords": [
+    "changelog",
+    "change log",
+    "release notes",
+    "parser"
+  ],
+  "engines": {
+    "node": ">=14.17"
+  },
+  "bugs": "https://github.com/osteele/changelog-parser/issues",
+  "repository": "osteele/changelog-parser",
+  "homepage": "https://github.com/osteele/changelog-parser#readme",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p .",
+    "lint": "eslint src --ext ts",
+    "prepack": "yarn build",
+    "prepare": "husky install",
+    "test": "jest",
+    "test:run": "ts-node example/changelog2html.ts tests/testdata/CHANGELOG.md"
+  },
+  "dependencies": {
+    "luxon": "^2.0.2",
+    "marked": "^3.0.8",
+    "node-html-parser": "^5.1.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^27.0.2",
+    "@types/luxon": "^2.0.5",
+    "@types/marked": "^3.0.2",
+    "@types/node": "14.x",
+    "@types/pug": "^2.0.5",
+    "@typescript-eslint/eslint-plugin": "^5.2.0",
+    "@typescript-eslint/parser": "^5.2.0",
+    "esbuild": "^0.13.12",
+    "esbuild-jest": "^0.5.0",
+    "eslint": "^8.1.0",
+    "husky": "^7.0.4",
+    "jest": "^27.3.1",
+    "prettier-eslint-cli": "^5.0.1",
+    "pug": "^3.0.2",
+    "ts-node": "^10.4.0",
+    "ts-node-dev": "^1.1.8",
+    "typescript": "^4.4.4"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "testMatch": [
+      "**/tests/**/*.ts"
+    ],
+    "transform": {
+      "^.+\\.tsx?$": "esbuild-jest"
+    }
+  }
+}
