@@ -6,9 +6,9 @@ import { DateTime } from "luxon";
 export type ChangeLog = {
   title: string;
   versions: {
-    version?: string;
+    version: string | null;
     title: string;
-    date?: string;
+    date: string | null;
     body: string;
     changes: { type: ChangeType; body: string }[];
     parsed: Record<ChangeType, string[]>;
@@ -24,17 +24,42 @@ export type ChangeType =
   | "Security"
   | string;
 
-export type Options = Partial<{
-  defaultTitle: string;
-  recognizeColonSections: boolean;
-  order: string[] | null;
-}> &
-  ({ text: string } | { filePath: string });
+export type Options = (
+  | {
+      /** Text of the change log. Provide either this or `filePath`. */
+      text: string;
+    }
+  | {
+      /** Path to change log. This is read synchronously as UTF-8. */
+      filePath: string;
+    }
+) &
+  Partial<{
+    /** Default title, if the source text doesn't have one. */
+    defaultTitle: string;
+
+    /** If true, recognize e.g. `Changed:` as equivalent to `### Changed`. */
+    recognizeColonSections: boolean;
+
+    /** If non-null, re-order change categories within each version. */
+    changeCategoryOrder: string[] | null;
+
+    /** Omit versions whose titles are equal to "Unreleased", ignoring case. */
+    omitUnreleasedVersions: boolean;
+  }>;
 
 const defaultOptions: Omit<Required<Options>, "text"> = {
   defaultTitle: "Release Notes",
+  changeCategoryOrder: [
+    "New",
+    "Changed",
+    "Improved",
+    "Fixed",
+    "Removed",
+    "Security",
+  ],
+  omitUnreleasedVersions: true,
   recognizeColonSections: true,
-  order: ["New", "Changed", "Improved", "Fixed", "Removed", "Security"],
 };
 
 const dateFormats = [
@@ -44,36 +69,39 @@ const dateFormats = [
   "LL/dd/yyyy",
   "LL/dd/yy",
 ];
+
+/** Parse a change log. At least one of `text` and `filePath` must be provided.
+ */
 export function parseChangeLog(options: Options): ChangeLog {
-  const opts = {
+  const defaultedOptions = {
     filePath: undefined,
     text: undefined,
     ...defaultOptions,
     ...options,
   };
-  let text = opts.filePath
-    ? fs.readFileSync(opts.filePath, "utf-8")
-    : opts.text!;
-  const { order } = opts;
+  let text = defaultedOptions.filePath
+    ? fs.readFileSync(defaultedOptions.filePath, "utf-8")
+    : defaultedOptions.text!;
+  const { changeCategoryOrder: order } = defaultedOptions;
 
-  if (opts.recognizeColonSections) {
+  if (defaultedOptions.recognizeColonSections) {
     text = text.replace(
-      /^(Added|New|Changed|Improved|Fixed|Removed|Security):$/gm,
+      /^(Added|New|Changed|Improved|Fixed|Removed|Security):$/gim,
       "### $1"
     );
   }
 
   const html = marked(text, { headerIds: false, smartypants: true });
   const htmlRoot = parse(html);
-  const title = htmlRoot.querySelector("h1")?.text || options.defaultTitle!;
-  const sections = findSections("h2", htmlRoot);
-  const data = {
-    title,
-    versions: sections.map(({ header, body }) => {
+  const title =
+    htmlRoot.querySelector("h1")?.text || defaultedOptions.defaultTitle!;
+  const versionSectionTitles = findSections("h2", htmlRoot);
+  let versions = versionSectionTitles.map(
+    ({ header, body }): ChangeLog["versions"][0] => {
       const title = header.text.replace(/^\[(.*)\]$/, "$1");
       let versionCandidate = title,
-        version: string | undefined,
-        date: string | undefined;
+        version: string | null = null,
+        date: string | null = null;
       const m = title.match(/(.+?)(?:\s+-+\s+|\s*[–—]\s*)(.+)/);
       if (m) {
         versionCandidate = m[1];
@@ -114,10 +142,15 @@ export function parseChangeLog(options: Options): ChangeLog {
       );
       const parsed = collect(entries);
       return { title, version, date, body, changes, parsed };
-    }),
-  };
+    }
+  );
+  if (defaultedOptions.omitUnreleasedVersions) {
+    versions = versions.filter(
+      (version) => version.title && !/^unreleased$/i.test(version.title)
+    );
+  }
 
-  return data;
+  return { title, versions };
 }
 
 function collect<K extends string | number | symbol, V>(

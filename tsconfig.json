@@ -5,6 +5,9 @@
   },
   "extends": "@tsconfig/node14/tsconfig.json",
   "root": true,
+  "include": [
+    "src/**/*"
+  ],
   "exclude": [
     "dist",
     "example",
