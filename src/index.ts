@@ -10,12 +10,12 @@ export type ChangeLog = {
     title: string;
     date: string | null;
     body: string;
-    changes: { type: ChangeType; body: string }[];
-    parsed: Record<ChangeType, string[]>;
+    changes: { type: CategoryName; body: string }[];
+    categories: Record<CategoryName, string[]>;
   }[];
 };
 
-export type ChangeType =
+export type CategoryName =
   | "New"
   | "Changed"
   | "Improved"
@@ -35,14 +35,14 @@ export type Options = (
     }
 ) &
   Partial<{
+    /** If non-null, re-order change categories within each version. */
+    categorySortOrder: string[] | null;
+
     /** Default title, if the source text doesn't have one. */
     defaultTitle: string;
 
     /** If true, recognize e.g. `Changed:` as equivalent to `### Changed`. */
     recognizeColonSections: boolean;
-
-    /** If non-null, re-order change categories within each version. */
-    changeCategoryOrder: string[] | null;
 
     /** Omit versions whose titles are equal to "Unreleased", ignoring case. */
     omitUnreleasedVersions: boolean;
@@ -50,7 +50,7 @@ export type Options = (
 
 const defaultOptions: Omit<Required<Options>, "text"> = {
   defaultTitle: "Release Notes",
-  changeCategoryOrder: [
+  categorySortOrder: [
     "New",
     "Changed",
     "Improved",
@@ -72,19 +72,21 @@ const dateFormats = [
 
 /** Parse a change log. At least one of `text` and `filePath` must be provided.
  */
-export function parseChangeLog(options: Options): ChangeLog {
-  const defaultedOptions = {
+export function parseChangeLog(filepathOrOptions: string | Options): ChangeLog {
+  const options = {
     filePath: undefined,
     text: undefined,
     ...defaultOptions,
-    ...options,
+    ...(typeof filepathOrOptions === "string"
+      ? { filePath: filepathOrOptions }
+      : filepathOrOptions),
   };
-  let text = defaultedOptions.filePath
-    ? fs.readFileSync(defaultedOptions.filePath, "utf-8")
-    : defaultedOptions.text!;
-  const { changeCategoryOrder: order } = defaultedOptions;
+  let text = options.filePath
+    ? fs.readFileSync(options.filePath, "utf-8")
+    : options.text!;
+  const { categorySortOrder: order } = options;
 
-  if (defaultedOptions.recognizeColonSections) {
+  if (options.recognizeColonSections) {
     text = text.replace(
       /^(Added|New|Changed|Improved|Fixed|Removed|Security):$/gim,
       "### $1"
@@ -93,8 +95,7 @@ export function parseChangeLog(options: Options): ChangeLog {
 
   const html = marked(text, { headerIds: false, smartypants: true });
   const htmlRoot = parse(html);
-  const title =
-    htmlRoot.querySelector("h1")?.text || defaultedOptions.defaultTitle!;
+  const title = htmlRoot.querySelector("h1")?.text || options.defaultTitle!;
   const versionSectionTitles = findSections("h2", htmlRoot);
   let versions = versionSectionTitles.map(
     ({ header, body }): ChangeLog["versions"][0] => {
@@ -115,8 +116,10 @@ export function parseChangeLog(options: Options): ChangeLog {
         versionCandidate.match(/^\[(.+)\]$/)?.[1] || versionCandidate;
       if (versionCandidate.match(/^\d+(\.\d+){0,2}\S*$/))
         version = versionCandidate;
+
+      // collect and sort changes
       let changes = findSections("h3", parse(body)).flatMap(
-        ({ header, body }): { type: ChangeType; body: string }[] => {
+        ({ header, body }): { type: CategoryName; body: string }[] => {
           const type = header.text;
           const ul = parse(body).querySelector("ul");
           return ul
@@ -131,20 +134,23 @@ export function parseChangeLog(options: Options): ChangeLog {
           ({ type: k1 }, { type: k2 }) => order.indexOf(k1) - order.indexOf(k2)
         );
       }
+
+      // collect changes into categories
       const entries = changes.map(
         ({
           type,
           body,
         }: {
-          type: ChangeType;
+          type: CategoryName;
           body: string;
-        }): [ChangeType, string] => [type, body]
+        }): [CategoryName, string] => [type, body]
       );
-      const parsed = collect(entries);
-      return { title, version, date, body, changes, parsed };
+      const categories = collect(entries);
+
+      return { title, version, date, body, changes, categories };
     }
   );
-  if (defaultedOptions.omitUnreleasedVersions) {
+  if (options.omitUnreleasedVersions) {
     versions = versions.filter(
       (version) => version.title && !/^unreleased$/i.test(version.title)
     );

@@ -36,7 +36,7 @@ describe("parseChangeLog", () => {
     });
     test("has an map of change types", () => {
       expect(changeLog.versions[0].changes).toBeInstanceOf(Array);
-      expect(changeLog.versions[0].parsed).toBeInstanceOf(Object);
+      expect(changeLog.versions[0].categories).toBeInstanceOf(Object);
     });
   });
 
