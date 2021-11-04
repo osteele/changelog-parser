@@ -2,7 +2,7 @@
   "name": "@osteele/changelog-parser",
   "description": "Parse CHANGELOG files from https://keepachangelog.com format.",
   "license": "MIT",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "author": {
     "name": "Oliver Steele",
     "email": "steele@osteele.com",
@@ -23,7 +23,7 @@
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "scripts": {
-    "build": "tsc -p .",
+    "build": "esbuild --outfile=dist/index.js --minify --platform=node --sourcemap ./src/* && tsc --emitDeclarationOnly --declaration",
     "lint": "eslint src --ext ts",
     "prepack": "yarn build",
     "prepare": "husky install",
