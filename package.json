@@ -1,5 +1,5 @@
 {
-  "name": "changelog-parser",
+  "name": "@osteele/changelog-parser",
   "description": "Parse CHANGELOG files from https://keepachangelog.com format.",
   "license": "MIT",
   "version": "0.0.1",
