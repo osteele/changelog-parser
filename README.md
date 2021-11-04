@@ -19,8 +19,11 @@ plaintext or markdown, you should use changelog-parser.
 ## Install
 
 ```sh
-npm install --save-dev changelog-parser
-yarn add -D changelog-parser
+npm install --save-dev @osteele/changelog-parser
+```
+
+```sh
+yarn add -D @osteele/changelog-parser
 ```
 
 ## Usage
@@ -60,7 +63,7 @@ Other options:
 
 #### defaultTitle: string
 
-Default title the ChangeLog, if the source text doesn't have a title.
+Default title, if the source text doesn't have a title.
 
 #### recognizeColonSections: boolean
 
