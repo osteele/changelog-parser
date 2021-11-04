@@ -118,6 +118,19 @@ Omit versions whose titles are equal to "Unreleased", ignoring case.
 
 _Default_: `true`
 
+#### outputFormat
+
+This controls the format of the `ChangeLog.changes[].body` and
+`ChangeLog.categories[key]` strings.
+
+Values:
+
+- `html`: An HTML string, e.g. `"An item with <em>emphasis</em> and a <a
+  href="target">link</a>."`
+- `text`: Text content, e.g. `"An item with emphasis and a link."`
+
+_Default_: `html`
+
 ## Comparison with other packages
 
 This package provides similar functionality to the
@@ -127,22 +140,34 @@ except that:
 
 1. This packages recognizes multi-line text in change lists. (The other packages
    return only the first line.)
-2. This packages returns HTML strings, instead of plaintext or markdown.
+2. This package can returns HTML strings, instead of plaintext or markdown.
    (parse-changelogs returns only plaintext. changelog-parser can return either
    plaintext or markdown.)
 3. Dates are in ISO format.
-4. There are options to sort changes by category, to omit unreleased
-   versions, and to recognize additional subheader formats.
+4. There are options to sort changes by category, to omit unreleased versions,
+   and to recognize additional formats for change category sections.
 
-If you want plaintext return values, you should one one of those packages. If you want
-plaintext or markdown return values, you should use changelog-parser.
+|                                         | @osteele/changelog-parser | changelog-parser | parse-changelogs |
+| --------------------------------------- | ------------------------- | ---------------- | ---------------- |
+| Can return immediate value              | ✔️                         |                  | ✔️                |
+| Can return `Promise`                    |                           | ✔️                |                  |
+| Can call async callback on completion   |                           | ✔️                |                  |
+| Can return HTML  change body text       | ✔️                         |                  |                  |
+| Can return Markdown  change body text   |                           | ✔️                |                  |
+| Can return unformatted change body text | ✔️                         | ✔️                | ✔️                |
+| Date format                             | ISO                       | same as input    | ISO              |
+| Reads multi-line list items             | ✔️                         | x                | x                |
 
-|                       | @osteele/changelog-parser | changelog-parser             | parse-changelogs |
-| --------------------- | ------------------------- | ---------------------------- | ---------------- |
-| Sync/async            | synchronous               | callback or Promise          | synchronous      |
-| Text values           | html string               | markdown or plaintext string | plaintext string |
-| Date format           | ISO                       | same as input                | ISO              |
-| Multi-line list items | ✔️                         | x                            | x                |
+## History
+
+I wrote this package the [Visual Studio Code P5 Server
+Extension](https://github.com/osteele/vscode-p5server), because
+`parse-changelogs` removed link formatting and didn't recognize multi-line
+changes and I didn't see an easy way to get from that code to what I wanted.
+
+I wasn't aware of `changelog-parser` until I went to publish this as an npm
+package, so I haven't looked at how difficult it would be to modify it to meet
+my requirements.
 
 ## License
 

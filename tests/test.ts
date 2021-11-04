@@ -47,13 +47,28 @@ describe("parseChangeLog", () => {
   });
 
   describe("changes", () => {
-    test("parses multiple lines", () => {
+    test("parses multiple-line changes", () => {
       expect(changeLog.versions[0].changes[0].body.replace(/\n/g, " ")).toMatch(
         /to the library list/
       );
     });
+
     test("preserves links", () => {
       expect(changeLog.versions[0].changes[0].body).toContain("<a href=");
+    });
+
+    test("obeys options.outputFormat: text", () => {
+      const changeLog = parseChangeLog({ text, outputFormat: "text" });
+      expect(changeLog.versions[0].changes[0].body).toContain(
+        "Add antiboredom/p5.patgrad to the"
+      );
+    });
+
+    test.skip("obeys options.outputFormat: markdown", () => {
+      const changeLog = parseChangeLog({ text, outputFormat: "text" });
+      expect(changeLog.versions[0].changes[0].body).toContain(
+        "Add [antiboredom/p5.patgrad](https://github.com/antiboredom/p5.patgrad) to the"
+      );
     });
   });
 

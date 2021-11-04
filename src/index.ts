@@ -46,6 +46,9 @@ export type Options = (
 
     /** Omit versions whose titles are equal to "Unreleased", ignoring case. */
     omitUnreleasedVersions: boolean;
+
+    /** The format of ChangeLog.changes[].body and ChangeLog.categories[key]. */
+    outputFormat: "html" | "text";
   }>;
 
 const defaultOptions: Omit<Required<Options>, "text"> = {
@@ -59,6 +62,7 @@ const defaultOptions: Omit<Required<Options>, "text"> = {
     "Security",
   ],
   omitUnreleasedVersions: true,
+  outputFormat: "html",
   recognizeColonSections: true,
 };
 
@@ -125,7 +129,7 @@ export function parseChangeLog(filepathOrOptions: string | Options): ChangeLog {
           return ul
             ? ul
                 .querySelectorAll("> li")
-                .map((li) => ({ type, body: li.innerHTML }))
+                .map((li) => ({ type, body: getHTML(li) }))
             : [];
         }
       );
@@ -157,6 +161,15 @@ export function parseChangeLog(filepathOrOptions: string | Options): ChangeLog {
   }
 
   return { title, versions };
+
+  function getHTML(elt: HTMLElement): string {
+    switch (options.outputFormat) {
+      case "html":
+        return elt.innerHTML;
+      case "text":
+        return elt.text;
+    }
+  }
 }
 
 function collect<K extends string | number | symbol, V>(
