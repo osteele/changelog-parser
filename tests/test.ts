@@ -7,31 +7,37 @@ describe("parseChangeLog", () => {
 
   test("parses a string", () => {
     const changeLog = parseChangeLog({ text });
-    expect(changeLog).toHaveProperty("title");
+    expect(changeLog).toHaveProperty("title", "Change Log");
   });
 
   test("parses a file", () => {
     const changeLog = parseChangeLog({ filePath });
-    expect(changeLog).toHaveProperty("title");
+    expect(changeLog).toHaveProperty("title", "Change Log");
+  });
+
+  test("works with a string parameter", () => {
+    const changeLog = parseChangeLog(filePath);
+    expect(changeLog).toHaveProperty("title", "Change Log");
   });
 
   const changeLog = parseChangeLog({ text });
-  test("has a title", () => {
-    expect(changeLog.title).toBe("Change Log");
+
+  test("has a title property", () => {
+    expect(changeLog).toHaveProperty("title", "Change Log");
   });
 
-  test("has an array of versions", () => {
+  test("has an version property", () => {
     expect(changeLog.versions).toBeInstanceOf(Array);
   });
 
   describe("version", () => {
-    test("has a title", () => {
+    test("has a title property", () => {
       expect(changeLog.versions[0].title).toBe("[1.1.8] - 2021-10-28");
     });
-    test("has a version number", () => {
+    test("has a version property", () => {
       expect(changeLog.versions[0].version).toBe("1.1.8");
     });
-    test("has a date", () => {
+    test("has a date property", () => {
       expect(changeLog.versions[0].date).toBe("October 28, 2021");
     });
     test("has an map of change types", () => {

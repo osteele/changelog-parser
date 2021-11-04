@@ -1,6 +1,6 @@
 {
   "name": "@osteele/changelog-parser",
-  "description": "Parse CHANGELOG files from https://keepachangelog.com format.",
+  "description": "Parse CHANGELOG files from markdown to JSON.",
   "license": "MIT",
   "version": "0.0.4",
   "author": {
@@ -30,8 +30,8 @@
     "lint": "eslint src --ext ts",
     "prepack": "yarn build",
     "prepare": "husky install",
-    "test": "jest",
-    "test:run": "ts-node example/changelog2html.ts tests/testdata/CHANGELOG.md"
+    "run:example": "ts-node example/changelog2html.ts tests/testdata/CHANGELOG.md",
+    "test": "jest"
   },
   "dependencies": {
     "luxon": "^2.0.2",
