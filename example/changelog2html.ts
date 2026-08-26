@@ -1,6 +1,6 @@
-#!/usr/bin/env ts-node
+#!/usr/bin/env bun
 
-import * as fs from "fs";
+import * as fs from "node:fs";
 import * as pug from "pug";
 import { parseChangeLog } from "../src";
 

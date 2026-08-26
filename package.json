@@ -2,7 +2,7 @@
   "name": "@osteele/changelog-parser",
   "description": "Parse CHANGELOG files from markdown to JSON.",
   "license": "MIT",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "author": {
     "name": "Oliver Steele",
     "email": "steele@osteele.com",
@@ -15,55 +15,61 @@
     "parser"
   ],
   "engines": {
-    "node": ">=14.17"
+    "node": ">=20.19.0"
   },
+  "packageManager": "bun@1.3.14",
+  "type": "module",
   "bugs": "https://github.com/osteele/changelog-parser/issues",
   "repository": "osteele/changelog-parser",
   "homepage": "https://github.com/osteele/changelog-parser#readme",
-  "main": "./dist/index.js",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
   "files": [
     "dist"
   ],
   "scripts": {
-    "build": "esbuild --outfile=dist/index.js --platform=node --format=cjs --minify --sourcemap ./src/* && tsc --emitDeclarationOnly --declaration",
-    "lint": "eslint src --ext ts",
-    "prepack": "yarn build",
-    "prepare": "husky install",
-    "run:example": "ts-node example/changelog2html.ts tests/testdata/CHANGELOG.md",
-    "test": "jest"
+    "audit": "bun run check && bun run test:mutation && bun pm pack --dry-run",
+    "benchmark": "bun run build && node scripts/benchmark.mjs",
+    "test:differential": "node scripts/differential-containers.mjs",
+    "build": "esbuild src/index.ts --platform=node --format=esm --minify --sourcemap --outfile=dist/index.js && esbuild src/index.ts --bundle --platform=node --format=cjs --minify --sourcemap --external:marked-smartypants --outfile=dist/index.cjs && tsc --emitDeclarationOnly",
+    "check": "bun run lint && bun run typecheck && bun run test && bun run build && bun run test:package",
+    "format": "biome format --write .",
+    "lint": "biome check .",
+    "prepack": "bun run build",
+    "run:example": "bun example/changelog2html.ts tests/testdata/CHANGELOG.md",
+    "setup": "husky",
+    "test": "bun test",
+    "test:mutation": "node scripts/mutation.mjs",
+    "test:mutation:general": "stryker run",
+    "test:mutation:general:dry": "stryker run --dryRunOnly",
+    "test:package": "node scripts/smoke.mjs",
+    "typecheck": "tsc --noEmit && tsc -p tsconfig.test.json"
+  },
+  "overrides": {
+    "qs": "6.15.3"
   },
   "dependencies": {
-    "luxon": "^2.0.2",
-    "marked": "^3.0.8",
-    "node-html-parser": "^5.1.0"
+    "entities": "^8.0.0",
+    "marked": "^18.0.9",
+    "marked-smartypants": "^1.1.12"
   },
   "devDependencies": {
-    "@types/jest": "^27.0.2",
-    "@types/luxon": "^2.0.5",
-    "@types/marked": "^3.0.2",
-    "@types/node": "14.x",
-    "@types/pug": "^2.0.5",
-    "@typescript-eslint/eslint-plugin": "^5.2.0",
-    "@typescript-eslint/parser": "^5.2.0",
-    "esbuild": "^0.13.12",
-    "esbuild-jest": "^0.5.0",
-    "eslint": "^8.1.0",
-    "husky": "^7.0.4",
-    "jest": "^27.3.1",
-    "prettier-eslint-cli": "^5.0.1",
-    "pug": "^3.0.2",
-    "ts-node": "^10.4.0",
-    "ts-node-dev": "^1.1.8",
-    "typescript": "^4.4.4"
-  },
-  "jest": {
-    "testEnvironment": "node",
-    "testMatch": [
-      "**/tests/**/*.ts"
-    ],
-    "transform": {
-      "^.+\\.tsx?$": "esbuild-jest"
-    }
+    "@biomejs/biome": "^2.5.8",
+    "@stryker-mutator/core": "9.6.1",
+    "@types/bun": "^1.3.14",
+    "@types/node": "^26.2.0",
+    "@types/pug": "^2.0.10",
+    "esbuild": "^0.28.2",
+    "husky": "^9.1.7",
+    "pug": "^3.0.4",
+    "typescript": "^7.0.2"
   }
 }

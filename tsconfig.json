@@ -1,18 +1,17 @@
 {
   "compilerOptions": {
+    "declaration": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
     "rootDir": "src",
-    "outDir": "dist"
+    "outDir": "dist",
+    "skipLibCheck": true,
+    "strict": true,
+    "target": "ES2022",
+    "types": ["node"]
   },
-  "extends": "@tsconfig/node14/tsconfig.json",
-  "root": true,
-  "include": [
-    "src/**/*"
-  ],
-  "exclude": [
-    "dist",
-    "example",
-    "build",
-    "node_modules",
-    "tests"
-  ]
+  "include": ["src/**/*.ts"],
+  "exclude": ["dist", "example", "build", "node_modules", "tests"]
 }
